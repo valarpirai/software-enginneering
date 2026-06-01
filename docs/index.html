@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning DSA</title>
+  <meta name="description" content="Data Structures and Algorithms — notes with Java examples and diagrams" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+
+    :root {
+      --theme-color: #159957;
+      --sidebar-width: 280px;
+      --content-max-width: 860px;
+      --base-font-size: 16px;
+      --base-line-height: 1.7;
+      --base-font-family: 'Open Sans', sans-serif;
+      --mono-font-size: 14px;
+      --heading-color: #159957;
+      --link-color: #1e6bb8;
+      --sidebar-background: #f5f5f5;
+      --sidebar-border-right: 1px solid #dce6f0;
+    }
+
+    /* Cayman-style header */
+    .app-name-link img, .app-name-link {
+      color: #fff !important;
+    }
+    .sidebar {
+      background: linear-gradient(120deg, #155799, #159957);
+      color: #fff;
+    }
+    .sidebar a {
+      color: #ddf0e8 !important;
+    }
+    .sidebar .sidebar-nav ul li.active > a {
+      color: #fff !important;
+      font-weight: 600;
+      border-left: 3px solid #fff;
+      padding-left: 8px;
+    }
+    .sidebar-nav ul li {
+      margin: 4px 0;
+    }
+    .sidebar-nav > ul > li > strong {
+      color: #a8e6c8;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      margin-top: 16px;
+    }
+    .search input {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+    }
+    .search input::placeholder { color: rgba(255,255,255,0.7); }
+    h1, h2 { color: #159957; }
+    h3, h4 { color: #155799; }
+  </style>
+</head>
+<body>
+  <div id="app">Loading...</div>
+
+  <script>
+    window.$docsify = {
+      name: 'Learning DSA',
+      repo: 'https://github.com/valarpirai/learning-dsa',
+      homepage: '00-index.md',
+      loadSidebar: true,
+      subMaxLevel: 2,
+      auto2top: true,
+      search: {
+        placeholder: 'Search...',
+        noData: 'No results.',
+        depth: 3
+      },
+      plugins: [
+        function (hook) {
+          hook.doneEach(function () {
+            mermaid.init(undefined, '.mermaid');
+          });
+        }
+      ]
+    };
+  </script>
+
+  <!-- Docsify -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+
+  <!-- Plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2/dist/docsify-copy-code.min.js"></script>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  </script>
+
+  <!-- Mermaid renderer for Docsify -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js"></script>
+</body>
+</html>
