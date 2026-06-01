@@ -1,242 +1,248 @@
 # Arrays & Strings
 
-Arrays and strings are the most basic data structures. Most problems start here.
+The building blocks of almost every coding problem. Master these first.
 
 ---
 
-## Array
+## Intuition
 
-An array stores elements in contiguous memory. Each element has an index starting at 0.
+An array stores items in a row in memory. Each item has an index. You jump to any item instantly — no searching needed.
+
+A string is an array of characters. In Java, strings are immutable. Every change creates a new object.
+
+---
+
+## Operations
+
+### Array
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Access by index | O(1) | `arr[i]` |
+| Search | O(n) | Check each element |
+| Insert at end | O(1)* | *Amortized for ArrayList |
+| Insert at middle | O(n) | Shift elements right |
+| Delete at middle | O(n) | Shift elements left |
+
+### String
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Access character | O(1) | `s.charAt(i)` |
+| Search substring | O(n·m) | n = string length, m = pattern length |
+| Concatenate with `+` | O(n) | Creates a new string each time |
+| `StringBuilder.append` | O(1)* | *Amortized |
+
+---
+
+## Sample Input
+
+```
+arr = [10, 20, 30, 40, 50]
+s   = "hello"
+```
+
+These values are used in all examples below.
+
+---
+
+## Visual Representation
+
+**Array — indexed boxes:**
 
 ```mermaid
-graph LR
-    I0["index 0\n10"] --- I1["index 1\n20"] --- I2["index 2\n30"] --- I3["index 3\n40"] --- I4["index 4\n50"]
-    style I0 fill:#4a90d9,color:#fff
-    style I1 fill:#4a90d9,color:#fff
-    style I2 fill:#4a90d9,color:#fff
-    style I3 fill:#4a90d9,color:#fff
-    style I4 fill:#4a90d9,color:#fff
+block-beta
+  columns 5
+  A["10\n[0]"]:1
+  B["20\n[1]"]:1
+  C["30\n[2]"]:1
+  D["40\n[3]"]:1
+  E["50\n[4]"]:1
+  style A fill:#4a90d9,color:#fff
+  style B fill:#4a90d9,color:#fff
+  style C fill:#4a90d9,color:#fff
+  style D fill:#4a90d9,color:#fff
+  style E fill:#4a90d9,color:#fff
 ```
 
-### Operations
+**String — character boxes:**
 
-| Operation       | Time | Notes                              |
-|-----------------|------|------------------------------------|
-| Access by index | O(1) | `arr[i]` is instant                |
-| Search          | O(n) | Must check each element            |
-| Insert at end   | O(1) | Amortized for dynamic arrays       |
-| Insert at middle| O(n) | Must shift elements right          |
-| Delete at middle| O(n) | Must shift elements left           |
+```mermaid
+block-beta
+  columns 5
+  A["h\n[0]"]:1
+  B["e\n[1]"]:1
+  C["l\n[2]"]:1
+  D["l\n[3]"]:1
+  E["o\n[4]"]:1
+  style A fill:#82b366,color:#fff
+  style B fill:#82b366,color:#fff
+  style C fill:#82b366,color:#fff
+  style D fill:#82b366,color:#fff
+  style E fill:#82b366,color:#fff
+```
 
 ---
 
-## Java Arrays
+## Step-by-step Trace — Find Maximum
+
+Input: `arr = [10, 20, 30, 40, 50]`
 
 ```java
-// Fixed-size array
-int[] arr = new int[5];
-arr[0] = 10;
-arr[1] = 20;
-
-// Array literal
-int[] nums = {10, 20, 30, 40, 50};
-
-// Access
-int first = nums[0];       // 10
-int last  = nums[nums.length - 1]; // 50
-
-// Iterate
-for (int n : nums) {
-    System.out.println(n);
+// Time: O(n)  Space: O(1)
+int findMax(int[] arr) {
+    int max = arr[0];
+    for (int i = 1; i < arr.length; i++) {
+        if (arr[i] > max) max = arr[i];
+    }
+    return max;
 }
-
-// Sort
-Arrays.sort(nums);
-
-// Binary search (array must be sorted)
-int idx = Arrays.binarySearch(nums, 30); // 2
-
-// Copy
-int[] copy = Arrays.copyOf(nums, nums.length);
-int[] slice = Arrays.copyOfRange(nums, 1, 4); // {20, 30, 40}
 ```
 
-## Java ArrayList (Dynamic Array)
+| Step | i | arr[i] | max | Action |
+|------|---|--------|-----|--------|
+| init | — | — | 10 | max = arr[0] |
+| 1 | 1 | 20 | 20 | 20 > 10 → update max |
+| 2 | 2 | 30 | 30 | 30 > 20 → update max |
+| 3 | 3 | 40 | 40 | 40 > 30 → update max |
+| 4 | 4 | 50 | 50 | 50 > 40 → update max |
+| done | — | — | **50** | return 50 |
+
+---
+
+## Java Implementation
+
+### Fixed-size Array
 
 ```java
-import java.util.ArrayList;
-import java.util.List;
+int[] arr = {10, 20, 30, 40, 50};
 
+int first = arr[0];                        // 10
+int last  = arr[arr.length - 1];           // 50
+Arrays.sort(arr);                          // sort in place
+int idx   = Arrays.binarySearch(arr, 30);  // 2 (array must be sorted)
+int[] copy = Arrays.copyOfRange(arr, 1, 4); // {20, 30, 40}
+```
+
+### Dynamic Array (ArrayList)
+
+```java
 List<Integer> list = new ArrayList<>();
 list.add(10);
 list.add(20);
 list.add(30);
 
-int val  = list.get(0);          // 10
-list.set(0, 99);                 // replace index 0
-list.remove(Integer.valueOf(20)); // remove by value
-list.remove(0);                  // remove by index
-
-int size = list.size();          // current count
-Collections.sort(list);          // sort
+int val = list.get(0);             // 10
+list.set(0, 99);                   // replace at index
+list.remove(Integer.valueOf(20));  // remove by value
+list.remove(0);                    // remove by index
+Collections.sort(list);
 ```
 
----
-
-## 2D Arrays
+### 2D Array
 
 ```java
-int[][] matrix = new int[3][3];
-
-// Fill
 int[][] grid = {
     {1, 2, 3},
     {4, 5, 6},
     {7, 8, 9}
 };
 
-// Access element at row 1, col 2
 int val = grid[1][2]; // 6
 
-// Iterate
-for (int r = 0; r < grid.length; r++) {
-    for (int c = 0; c < grid[0].length; c++) {
+for (int r = 0; r < grid.length; r++)
+    for (int c = 0; c < grid[0].length; c++)
         System.out.print(grid[r][c] + " ");
-    }
-}
 ```
 
----
-
-## String
-
-A string is an immutable sequence of characters in Java. Every modification creates a new string object.
-
-```mermaid
-graph LR
-    S["\"hello\""]
-    C0["h\n[0]"] --- C1["e\n[1]"] --- C2["l\n[2]"] --- C3["l\n[3]"] --- C4["o\n[4]"]
-    style C0 fill:#82b366,color:#fff
-    style C1 fill:#82b366,color:#fff
-    style C2 fill:#82b366,color:#fff
-    style C3 fill:#82b366,color:#fff
-    style C4 fill:#82b366,color:#fff
-```
-
-### Common String Operations
+### String Operations
 
 ```java
-String s = "hello world";
+String s = "hello";
 
-// Length
-int len = s.length();           // 11
-
-// Access character
-char c = s.charAt(0);           // 'h'
-
-// Substring
-String sub = s.substring(6);    // "world"
-String sub2 = s.substring(0, 5); // "hello"
-
-// Search
-int idx = s.indexOf("world");   // 6
-boolean has = s.contains("llo"); // true
-
-// Comparison
-boolean eq = s.equals("hello world"); // true
-int cmp = s.compareTo("hello");       // positive (longer)
-
-// Transform
-String upper = s.toUpperCase();  // "HELLO WORLD"
-String lower = s.toLowerCase();  // "hello world"
-String trimmed = "  hi  ".strip(); // "hi"
-String replaced = s.replace("world", "Java"); // "hello Java"
-
-// Split
-String[] parts = s.split(" "); // ["hello", "world"]
-
-// Convert to char array
+char c       = s.charAt(0);         // 'h'
+String sub   = s.substring(1, 4);   // "ell"
+int idx      = s.indexOf("ll");     // 2
+boolean has  = s.contains("ell");   // true
+String upper = s.toUpperCase();     // "HELLO"
+String[] parts = "a b c".split(" "); // ["a","b","c"]
 char[] chars = s.toCharArray();
 ```
 
-### String vs StringBuilder
-
-String is immutable. Concatenating strings in a loop creates many objects.
+### StringBuilder — Build Strings in a Loop
 
 ```java
-// Slow — creates a new String object each iteration
+// Slow — creates a new object every iteration
 String result = "";
-for (int i = 0; i < 1000; i++) {
-    result += i;  // O(n²) total
-}
+for (int i = 0; i < n; i++) result += i; // O(n²)
 
-// Fast — StringBuilder mutates in place
+// Fast — mutates in place
 StringBuilder sb = new StringBuilder();
-for (int i = 0; i < 1000; i++) {
-    sb.append(i); // O(n) total
-}
-String result2 = sb.toString();
+for (int i = 0; i < n; i++) sb.append(i); // O(n)
+String result = sb.toString();
 ```
 
-| Class           | Mutable | Thread-safe | Use When                    |
-|-----------------|---------|-------------|-----------------------------|
-| `String`        | No      | Yes         | Short, infrequent changes   |
-| `StringBuilder` | Yes     | No          | Loop building, most cases   |
-| `StringBuffer`  | Yes     | Yes         | Multi-threaded string build |
+### Common Patterns
 
----
-
-## Common Patterns
-
-### Sliding Window — Max Sum Subarray of size k
+**Two Pointers — palindrome check:**
 
 ```java
-int maxSum(int[] nums, int k) {
-    int sum = 0;
-    for (int i = 0; i < k; i++) sum += nums[i];
-    int max = sum;
-    for (int i = k; i < nums.length; i++) {
-        sum += nums[i] - nums[i - k];
-        max = Math.max(max, sum);
-    }
-    return max;
-}
-```
-
-### Two Pointers — Check Palindrome
-
-```java
+// Time: O(n)  Space: O(1)
 boolean isPalindrome(String s) {
-    int left = 0, right = s.length() - 1;
-    while (left < right) {
-        if (s.charAt(left) != s.charAt(right)) return false;
-        left++;
-        right--;
+    int l = 0, r = s.length() - 1;
+    while (l < r) {
+        if (s.charAt(l) != s.charAt(r)) return false;
+        l++; r--;
     }
     return true;
 }
 ```
 
-### Frequency Map on String
+**Frequency map — character count:**
 
 ```java
-int[] charFreq(String s) {
-    int[] freq = new int[26];
-    for (char c : s.toCharArray()) {
-        freq[c - 'a']++;
-    }
-    return freq;
-}
+// Time: O(n)  Space: O(1) — fixed 26-slot array
+int[] freq = new int[26];
+for (char c : s.toCharArray()) freq[c - 'a']++;
 ```
 
 ---
 
-## Key Pitfalls
+## Common Mistakes
 
-| Pitfall                              | Fix                                      |
-|--------------------------------------|------------------------------------------|
-| `==` compares references, not values | Use `.equals()` for string comparison    |
-| String concatenation in loop is O(n²)| Use `StringBuilder`                      |
-| `substring()` in Java 8+ copies data | Aware of memory on large strings         |
-| Off-by-one on index                  | Check `< length` not `<= length`        |
-| Integer overflow on large index math | Cast to `long` before multiplying        |
+- **Using `==` to compare strings.** It checks the reference, not the value. Use `.equals()`.
+- **Concatenating strings in a loop.** Each `+` creates a new object. Use `StringBuilder`.
+- **Off-by-one on index.** Loop condition is `i < arr.length`, not `i <= arr.length`.
+- **Calling `.length()` on an array.** Arrays use `.length` (no parentheses). Strings use `.length()`.
+- **Assuming `indexOf` returns 0 when not found.** It returns `-1`. Always check before using the result.
+- **Integer overflow in index math.** `int mid = (left + right) / 2` can overflow. Use `left + (right - left) / 2`.
+
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Easy | Two Sum | [LeetCode 1](https://leetcode.com/problems/two-sum/) |
+| Medium | Longest Substring Without Repeating Characters | [LeetCode 3](https://leetcode.com/problems/longest-substring-without-repeating-characters/) |
+| Medium | Product of Array Except Self | [LeetCode 238](https://leetcode.com/problems/product-of-array-except-self/) |
+
+---
+
+## Deep Dive
+
+### Why Strings are Immutable in Java
+
+The JVM keeps a **string pool** — a cache of string literals. Two variables with the same literal point to the same object. If strings were mutable, changing one would change the other. Immutability makes this safe.
+
+### String vs StringBuilder vs StringBuffer
+
+| Class | Mutable | Thread-safe | Use when |
+|-------|---------|-------------|----------|
+| `String` | No | Yes | Short, infrequent changes |
+| `StringBuilder` | Yes | No | Loop building — most cases |
+| `StringBuffer` | Yes | Yes | Multi-threaded string building |
+
+### ArrayList Resizing
+
+ArrayList starts with capacity 10. When full, it creates a new array of size 1.5×, copies all elements, then discards the old array. This is O(n) but happens rarely — so `add()` is O(1) amortized.
