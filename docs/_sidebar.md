@@ -37,4 +37,4 @@
 - [Backtracking](44-backtracking.md)
 
 - **Practice**
-- [Popular 50 Problems](50-popular-problems.md)
+- [Popular Problems](popular-problems.md)
