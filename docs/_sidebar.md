@@ -5,7 +5,6 @@
 - [Arrays & Strings](00a-arrays-and-strings.md)
 - [Linked List](01-linked-list.md)
 - [Stack](03-stack.md)
-- [MinStack](03a-min-stack.md)
 - [Queue](04-queue.md)
 - [Hash Map](05-hash-map.md)
 - [Hash Set](06-hash-set.md)

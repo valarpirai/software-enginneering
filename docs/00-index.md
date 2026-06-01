@@ -38,7 +38,6 @@ Files:
 - [00a — Arrays & Strings](00a-arrays-and-strings.md)
 - [01 — Linked List](01-linked-list.md)
 - [03 — Stack](03-stack.md)
-- [03a — MinStack](03a-min-stack.md)
 - [04 — Queue](04-queue.md)
 
 ---

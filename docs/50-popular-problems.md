@@ -30,6 +30,7 @@ Solve them in order. Each builds on the last.
 | 24 | Graph breadth first search | Graph | Medium |
 | 25 | String subsequences | Backtracking | Medium |
 | 26 | Valid brackets | Stack | Easy |
+| 26a | [Min Stack](03a-min-stack.md) | Stack | Medium |
 | 27 | Flatten binary tree | Tree | Medium |
 | 28 | Lowest common ancestor | Tree | Medium |
 | 29 | Minimum in rotated sorted array | Binary Search | Medium |
