@@ -1,8 +1,9 @@
 - [Index](00-index.md)
-- [Complexity Analysis](00b-complexity-analysis.md)
+- [Complexity Analysis](00c-complexity-analysis.md)
 
 - **Data Structures**
-- [Arrays & Strings](00a-arrays-and-strings.md)
+- [Arrays](00a-arrays.md)
+- [Strings](00b-strings.md)
 - [Linked List](01-linked-list.md)
 - [Stack](03-stack.md)
 - [Queue](04-queue.md)

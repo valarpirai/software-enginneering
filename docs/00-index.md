@@ -2,7 +2,7 @@
 
 A reference guide covering the most common DSA topics with time/space complexity and learning order.
 
-- [Complexity Analysis](00b-complexity-analysis.md) — Big O, time & space complexity rules
+- [Complexity Analysis](00c-complexity-analysis.md) — Big O, time & space complexity rules
 - [Popular 50 Problems](50-popular-problems.md) — Curated interview problems with progress tracker
 
 ---
@@ -35,7 +35,8 @@ A reference guide covering the most common DSA topics with time/space complexity
 | Deque           | O(n)   | O(n)   | O(1)   | O(1)   | Insert/remove at both ends    |
 
 Files:
-- [00a — Arrays & Strings](00a-arrays-and-strings.md)
+- [00a — Arrays](00a-arrays.md)
+- [00b — Strings](00b-strings.md)
 - [01 — Linked List](01-linked-list.md)
 - [03 — Stack](03-stack.md)
 - [04 — Queue](04-queue.md)
