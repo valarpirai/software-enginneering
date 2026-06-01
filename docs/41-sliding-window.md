@@ -1,31 +1,72 @@
 # Sliding Window
 
-A sliding window maintains a contiguous subarray or substring of variable or fixed size. Instead of recomputing from scratch, it adds the new element entering the window and removes the element leaving. Reduces O(n²) to O(n).
+Maintain a contiguous subarray or substring. Add the incoming element. Remove the outgoing element. Avoid recomputing from scratch.
 
 ---
 
-## Fixed-Size Window
+## Intuition
 
-Window size stays constant. Slide one step at a time.
+Imagine a train window sliding along a track. As the train moves, one new tree enters the view and one old tree leaves. You don't count all the trees in view from scratch — you just add one and remove one. Same idea: update the window in O(1) instead of recomputing in O(k).
+
+---
+
+## Patterns
+
+| Pattern | Window size | Use when |
+|---------|------------|----------|
+| Fixed | Constant k | Max/min/sum over k elements |
+| Variable | Expands and shrinks | Longest/shortest subarray meeting a condition |
+
+---
+
+## Sample Input
+
+```
+Fixed:    arr = [1, 2, 3, 4, 5, 6], k = 3  → max sum subarray
+Variable: s = "abcabcbb"  → longest substring without repeating chars
+```
+
+---
+
+## Visual Representation
+
+**Fixed window of size 3 sliding right:**
 
 ```mermaid
 graph LR
-    subgraph "Window of size 3 sliding right"
-    A1["[**1  2  3**  4  5  6]  sum=6"]
-    A2["[1  **2  3  4**  5  6]  sum=9"]
-    A3["[1  2  **3  4  5**  6]  sum=12"]
-    A4["[1  2  3  **4  5  6**]  sum=15"]
+    subgraph "Window slides right"
+    A["[1 2 3] 4 5 6  sum=6"]
+    B["1 [2 3 4] 5 6  sum=9"]
+    C["1 2 [3 4 5] 6  sum=12"]
+    D["1 2 3 [4 5 6]  sum=15 ← max"]
     end
-    style A4 fill:#82b366,color:#fff
+    style D fill:#82b366,color:#fff
 ```
 
-### Example — Maximum Sum Subarray of Size k
+---
+
+## Step-by-step Trace — Maximum Sum Subarray of Size k
+
+Input: `arr = [1, 2, 3, 4, 5, 6]`, k = 3
+
+| i | Add | Remove | sum | max |
+|---|-----|--------|-----|-----|
+| 0–2 | init window | — | 6 | 6 |
+| 3 | arr[3]=4 | arr[0]=1 | 9 | 9 |
+| 4 | arr[4]=5 | arr[1]=2 | 12 | 12 |
+| 5 | arr[5]=6 | arr[2]=3 | 15 | **15** |
+
+---
+
+## Java Implementation
+
+### Fixed Window — Maximum Sum of Size k
 
 ```java
+// Time: O(n)  Space: O(1)
 int maxSumSubarray(int[] nums, int k) {
     int sum = 0;
     for (int i = 0; i < k; i++) sum += nums[i];
-
     int max = sum;
     for (int i = k; i < nums.length; i++) {
         sum += nums[i] - nums[i - k]; // add new, remove old
@@ -35,37 +76,18 @@ int maxSumSubarray(int[] nums, int k) {
 }
 ```
 
----
-
-## Variable-Size Window
-
-Window expands to the right. Shrinks from the left when a condition is violated.
-
-```mermaid
-graph LR
-    subgraph "Expand right until invalid, shrink left"
-    S1["left=0 right=0  valid"]
-    S1 --> S2["expand right until window becomes invalid"]
-    S2 --> S3["shrink left until valid again"]
-    S3 --> S4["track best window size at each step"]
-    end
-    style S4 fill:#82b366,color:#fff
-```
-
-### Example — Longest Substring Without Repeating Characters
+### Variable Window — Longest Substring Without Repeating Chars
 
 ```java
+// Time: O(n)  Space: O(k) — k = charset size
 int lengthOfLongestSubstring(String s) {
     Set<Character> window = new HashSet<>();
     int left = 0, max = 0;
-
     for (int right = 0; right < s.length(); right++) {
-        char c = s.charAt(right);
-        while (window.contains(c)) {
-            window.remove(s.charAt(left));
-            left++;
+        while (window.contains(s.charAt(right))) {
+            window.remove(s.charAt(left++));
         }
-        window.add(c);
+        window.add(s.charAt(right));
         max = Math.max(max, right - left + 1);
     }
     return max;
@@ -73,79 +95,22 @@ int lengthOfLongestSubstring(String s) {
 // "abcabcbb" → 3 ("abc")
 ```
 
----
-
-## Example — Minimum Window Substring
-
-Find the smallest substring in `s` that contains all characters of `t`.
-
-```java
-String minWindow(String s, String t) {
-    Map<Character, Integer> need = new HashMap<>();
-    for (char c : t.toCharArray()) need.merge(c, 1, Integer::sum);
-
-    int left = 0, matched = 0;
-    int minLen = Integer.MAX_VALUE, start = 0;
-    Map<Character, Integer> window = new HashMap<>();
-
-    for (int right = 0; right < s.length(); right++) {
-        char c = s.charAt(right);
-        window.merge(c, 1, Integer::sum);
-        if (need.containsKey(c) && window.get(c).equals(need.get(c))) matched++;
-
-        while (matched == need.size()) {
-            if (right - left + 1 < minLen) {
-                minLen = right - left + 1;
-                start = left;
-            }
-            char leftChar = s.charAt(left++);
-            if (need.containsKey(leftChar)) {
-                if (window.get(leftChar).equals(need.get(leftChar))) matched--;
-                window.merge(leftChar, -1, Integer::sum);
-            }
-        }
-    }
-    return minLen == Integer.MAX_VALUE ? "" : s.substring(start, start + minLen);
-}
-```
-
----
-
-## Example — Max Consecutive Ones (Allow k flips)
-
-```java
-int maxOnes(int[] nums, int k) {
-    int left = 0, zeros = 0, max = 0;
-    for (int right = 0; right < nums.length; right++) {
-        if (nums[right] == 0) zeros++;
-        while (zeros > k) {
-            if (nums[left] == 0) zeros--;
-            left++;
-        }
-        max = Math.max(max, right - left + 1);
-    }
-    return max;
-}
-```
-
----
-
-## Template
+### Variable Window Template
 
 ```java
 int slidingWindow(int[] nums) {
     int left = 0, result = 0;
-    // window state (sum, count, set, map...)
+    // window state: sum, count, map, set...
 
     for (int right = 0; right < nums.length; right++) {
-        // expand window: add nums[right]
+        // 1. expand: add nums[right] to window
 
         while (/* window is invalid */) {
-            // shrink window: remove nums[left]
+            // 2. shrink: remove nums[left] from window
             left++;
         }
 
-        // update result with current window [left, right]
+        // 3. update result with window [left, right]
         result = Math.max(result, right - left + 1);
     }
     return result;
@@ -154,12 +119,37 @@ int slidingWindow(int[] nums) {
 
 ---
 
-## When to Use
+## Common Mistakes
 
-| Signal in problem                                  | Use sliding window? |
-|----------------------------------------------------|---------------------|
-| Contiguous subarray or substring                   | Yes                 |
-| Fixed or variable window size                      | Yes                 |
-| "Longest" or "shortest" subarray satisfying X      | Yes — variable      |
-| Sum, average, or count in a subarray               | Yes — fixed         |
-| "At most k" distinct / zeros / repeating           | Yes — variable      |
+- **Recomputing the window from scratch each step.** The whole point is to update in O(1). Subtract the leaving element, add the entering element.
+- **Not shrinking the window when it becomes invalid.** The `while` loop must shrink until the window is valid again — a single `if` is not enough.
+- **Window size formula.** Current window size is `right - left + 1`, not `right - left`.
+- **Using sliding window on a non-contiguous problem.** Sliding window only works for contiguous subarrays or substrings. For non-contiguous subsequences, use DP or backtracking.
+
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Medium | Longest Substring Without Repeating Characters | [LeetCode 3](https://leetcode.com/problems/longest-substring-without-repeating-characters/) |
+| Medium | Minimum Size Subarray Sum | [LeetCode 209](https://leetcode.com/problems/minimum-size-subarray-sum/) |
+| Hard | Sliding Window Maximum | [LeetCode 239](https://leetcode.com/problems/sliding-window-maximum/) |
+
+---
+
+## Deep Dive
+
+### When to Use Sliding Window
+
+| Signal in problem | Pattern |
+|-------------------|---------|
+| "subarray of size k" | Fixed window |
+| "longest subarray satisfying X" | Variable — maximize right - left |
+| "shortest subarray satisfying X" | Variable — minimize right - left |
+| "at most k distinct characters" | Variable with frequency map |
+| "sum equals target" | Variable or prefix sums |
+
+### Sliding Window vs Two Pointers
+
+Both use a left and right pointer. Sliding window focuses on a contiguous range and tracks window state (sum, counts, sets). Two pointers focuses on finding a pair or eliminating candidates. They overlap — many sliding window problems are also two-pointer problems.

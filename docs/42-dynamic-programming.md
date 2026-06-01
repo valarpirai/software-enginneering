@@ -1,32 +1,34 @@
 # Dynamic Programming
 
-Dynamic programming (DP) solves problems by breaking them into smaller overlapping subproblems and caching the results. Solve each subproblem once, reuse the answer.
+Break a problem into smaller overlapping subproblems. Solve each once. Cache and reuse the results.
 
 ---
 
-## When to Use DP
+## Intuition
 
-Two conditions must hold:
+Without DP, recursion recomputes the same subproblems millions of times. With DP, you compute each subproblem once and look up the answer instantly the next time. It trades memory for speed.
 
-1. **Optimal substructure** — the optimal solution contains optimal solutions to subproblems.
+---
+
+## Two Conditions for DP
+
+1. **Optimal substructure** — the best solution to the problem contains best solutions to its subproblems.
 2. **Overlapping subproblems** — the same subproblems appear again and again.
 
----
-
-## Two Approaches
-
-| Approach      | Direction          | How                                        |
-|---------------|--------------------|--------------------------------------------|
-| Top-down (Memoization) | Problem → subproblems | Recursive + cache results in a map/array |
-| Bottom-up (Tabulation) | Subproblems → problem | Fill a table iteratively from base cases |
+If both hold, DP can help. If subproblems don't overlap, divide-and-conquer works instead.
 
 ---
 
-## Example 1 — Fibonacci Number
+## Sample Input
 
-`fib(n) = fib(n-1) + fib(n-2)`
+```
+Fibonacci: n = 6  → fib(6) = 8
+Coin change: coins = [1, 5, 6, 9], amount = 11  → 2 coins (5+6)
+```
 
-Without DP, naïve recursion recomputes the same values repeatedly — O(2ⁿ).
+---
+
+## Visual Representation — Fibonacci Without DP
 
 ```mermaid
 graph TD
@@ -36,13 +38,35 @@ graph TD
     F3B --> F2C["fib(2)"] & F1B["fib(1)"]
     style F3A fill:#ff9900,color:#000
     style F3B fill:#ff9900,color:#000
+    style F2A fill:#d94a4a,color:#fff
+    style F2B fill:#d94a4a,color:#fff
+    style F2C fill:#d94a4a,color:#fff
 ```
 
-`fib(3)` is computed twice. For fib(50), millions of recomputations happen.
+`fib(3)` computed twice, `fib(2)` computed three times. Gets exponentially worse for large n.
 
-### Top-Down (Memoization)
+---
+
+## Step-by-step Trace — Fibonacci (Bottom-up)
+
+Input: n = 6
+
+| i | dp[i-2] | dp[i-1] | dp[i] |
+|---|---------|---------|-------|
+| 2 | 0 | 1 | 1 |
+| 3 | 1 | 1 | 2 |
+| 4 | 1 | 2 | 3 |
+| 5 | 2 | 3 | 5 |
+| 6 | 3 | 5 | **8** |
+
+---
+
+## Java Implementation
+
+### Fibonacci — Top-down (Memoization)
 
 ```java
+// Time: O(n)  Space: O(n)
 Map<Integer, Long> memo = new HashMap<>();
 
 long fib(int n) {
@@ -52,26 +76,13 @@ long fib(int n) {
     memo.put(n, result);
     return result;
 }
-// O(n) time, O(n) space
 ```
 
-### Bottom-Up (Tabulation)
+### Fibonacci — Bottom-up (Tabulation)
 
 ```java
+// Time: O(n)  Space: O(1)
 long fib(int n) {
-    if (n <= 1) return n;
-    long[] dp = new long[n + 1];
-    dp[0] = 0;
-    dp[1] = 1;
-    for (int i = 2; i <= n; i++) {
-        dp[i] = dp[i - 1] + dp[i - 2];
-    }
-    return dp[n];
-}
-// O(n) time, O(n) space
-
-// Space-optimized: only need last two values
-long fibOptimal(int n) {
     if (n <= 1) return n;
     long prev2 = 0, prev1 = 1;
     for (int i = 2; i <= n; i++) {
@@ -81,98 +92,88 @@ long fibOptimal(int n) {
     }
     return prev1;
 }
-// O(n) time, O(1) space
 ```
 
----
-
-## Example 2 — 0/1 Knapsack
-
-Given items with weights and values, maximize value with a weight limit W.
+### Coin Change — Minimum Coins
 
 ```java
-int knapsack(int[] weights, int[] values, int W) {
-    int n = weights.length;
-    int[][] dp = new int[n + 1][W + 1];
-
-    for (int i = 1; i <= n; i++) {
-        for (int w = 0; w <= W; w++) {
-            dp[i][w] = dp[i - 1][w]; // skip item i
-            if (weights[i - 1] <= w) {
-                dp[i][w] = Math.max(dp[i][w],
-                    dp[i - 1][w - weights[i - 1]] + values[i - 1]); // take item i
-            }
-        }
-    }
-    return dp[n][W];
-}
-```
-
----
-
-## Example 3 — Longest Common Subsequence (LCS)
-
-```java
-int lcs(String s1, String s2) {
-    int m = s1.length(), n = s2.length();
-    int[][] dp = new int[m + 1][n + 1];
-
-    for (int i = 1; i <= m; i++) {
-        for (int j = 1; j <= n; j++) {
-            if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
-                dp[i][j] = dp[i - 1][j - 1] + 1;
-            } else {
-                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-            }
-        }
-    }
-    return dp[m][n];
-}
-// lcs("ABCBDAB", "BDCAB") → 4
-```
-
----
-
-## Example 4 — Coin Change (Minimum Coins)
-
-```java
+// Time: O(amount × coins)  Space: O(amount)
 int coinChange(int[] coins, int amount) {
     int[] dp = new int[amount + 1];
-    Arrays.fill(dp, amount + 1); // fill with impossible value
+    Arrays.fill(dp, amount + 1); // sentinel: impossible value
     dp[0] = 0;
-
-    for (int i = 1; i <= amount; i++) {
-        for (int coin : coins) {
-            if (coin <= i) {
-                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
-            }
-        }
-    }
+    for (int i = 1; i <= amount; i++)
+        for (int coin : coins)
+            if (coin <= i) dp[i] = Math.min(dp[i], dp[i - coin] + 1);
     return dp[amount] > amount ? -1 : dp[amount];
 }
 // coins=[1,5,6,9], amount=11 → 2 (5+6)
 ```
 
----
+### 0/1 Knapsack
 
-## DP Problem Categories
+```java
+// Time: O(n × W)  Space: O(n × W)
+int knapsack(int[] weights, int[] values, int W) {
+    int n = weights.length;
+    int[][] dp = new int[n + 1][W + 1];
+    for (int i = 1; i <= n; i++)
+        for (int w = 0; w <= W; w++) {
+            dp[i][w] = dp[i-1][w]; // skip item i
+            if (weights[i-1] <= w)
+                dp[i][w] = Math.max(dp[i][w], dp[i-1][w-weights[i-1]] + values[i-1]);
+        }
+    return dp[n][W];
+}
+```
 
-| Category               | Classic Problems                                   |
-|------------------------|----------------------------------------------------|
-| 1D DP                  | Fibonacci, Climbing Stairs, House Robber           |
-| 2D DP (Grid)           | Unique Paths, Minimum Path Sum                     |
-| Subsequence            | LCS, LIS, Edit Distance                            |
-| Knapsack               | 0/1 Knapsack, Coin Change, Subset Sum              |
-| Interval DP            | Matrix Chain Multiplication, Burst Balloons        |
-| String DP              | Palindrome Partitioning, Regex Matching            |
+### How to Approach Any DP Problem
 
----
-
-## How to Approach a DP Problem
-
-1. Identify if it has optimal substructure and overlapping subproblems.
-2. Define the DP state — what does `dp[i]` or `dp[i][j]` represent?
+1. Identify overlapping subproblems.
+2. Define the state — what does `dp[i]` or `dp[i][j]` mean?
 3. Write the recurrence relation.
 4. Set base cases.
-5. Decide top-down or bottom-up.
-6. Check if you can reduce space.
+5. Choose top-down or bottom-up.
+6. Reduce space if possible.
+
+---
+
+## Common Mistakes
+
+- **Not defining the DP state clearly.** Write `dp[i] = ...` in plain English before writing code. Vague state leads to wrong recurrences.
+- **Wrong base cases.** An off-by-one in base cases corrupts every value built on top.
+- **Filling the table in the wrong order.** Bottom-up DP requires computing smaller subproblems before larger ones. Wrong order means you use uncomputed values.
+- **Confusing top-down with bottom-up space.** Top-down (memoization) uses stack space for recursion on top of the memo table. Bottom-up avoids the call stack entirely.
+
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Easy | Climbing Stairs | [LeetCode 70](https://leetcode.com/problems/climbing-stairs/) |
+| Medium | Coin Change | [LeetCode 322](https://leetcode.com/problems/coin-change/) |
+| Medium | Longest Common Subsequence | [LeetCode 1143](https://leetcode.com/problems/longest-common-subsequence/) |
+
+---
+
+## Deep Dive
+
+### Top-down vs Bottom-up
+
+| | Top-down | Bottom-up |
+|--|----------|-----------|
+| Style | Recursive + memo | Iterative table |
+| Order | Lazy — only computes needed subproblems | Eager — fills entire table |
+| Stack risk | StackOverflow on deep recursion | No recursion |
+| Easier to write | Usually | Takes more planning |
+
+### DP Problem Categories
+
+| Category | Classic Problems |
+|----------|----------------|
+| 1D DP | Fibonacci, Climbing Stairs, House Robber |
+| 2D DP (Grid) | Unique Paths, Minimum Path Sum |
+| Subsequence | LCS, LIS, Edit Distance |
+| Knapsack | 0/1 Knapsack, Coin Change, Subset Sum |
+| String DP | Palindrome Partitioning, Regex Matching |

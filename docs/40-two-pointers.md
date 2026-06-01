@@ -1,141 +1,161 @@
 # Two Pointers
 
-Two pointers is a technique that uses two index variables to scan an array or string. Moving them toward each other (or in the same direction) reduces nested loops from O(n²) to O(n).
+Use two index variables to scan an array or string. Moving them reduces O(n²) nested loops to O(n).
+
+---
+
+## Intuition
+
+Instead of checking every pair with a nested loop, two pointers squeeze the problem from both ends — or one moves faster than the other. Each element is visited at most once. O(n) instead of O(n²).
 
 ---
 
 ## Patterns
 
-### Pattern 1 — Opposite Ends
+| Pattern | Pointers start at | Move | Use when |
+|---------|------------------|------|----------|
+| Opposite ends | left=0, right=n-1 | Toward center | Pair sums, palindrome, container |
+| Fast and slow | Both at start | Fast moves 2×, slow 1× | Cycle detection, middle of list |
+| Same direction | Both at start | Fast advances on condition | Remove duplicates, partition |
 
-Both pointers start at opposite ends and move toward the center.
+---
+
+## Sample Input
+
+```
+arr = [1, 2, 4, 6, 8, 9], target = 9
+Find two numbers that sum to target.
+```
+
+---
+
+## Visual Representation
 
 ```mermaid
 graph LR
-    L(["left →"]) --- A["1"] --- B["2"] --- C["3"] --- D["4"] --- E["5"] --- R(["← right"])
+    L(["left →"]) --- A["1"] --- B["2"] --- C["4"] --- D["6"] --- E["8"] --- R(["← right"])
     style L fill:#4a90d9,color:#fff
     style R fill:#d94a4a,color:#fff
 ```
 
-Use when: target sum, palindrome check, container with most water.
+---
 
-### Pattern 2 — Fast and Slow
+## Step-by-step Trace — Two Sum (sorted array)
 
-Both pointers start at the same end. One moves faster than the other.
+Input: `arr = [1, 2, 4, 6, 8, 9]`, target = 9
 
-```mermaid
-graph LR
-    S(["slow"]) --> A["1"] --> B["2"] --> C["3"] --> D["4"] --> E["5"]
-    F(["fast"]) --> C
-    style S fill:#4a90d9,color:#fff
-    style F fill:#ff9900,color:#000
-```
+| Step | left | right | arr[l] | arr[r] | sum | Action |
+|------|------|-------|--------|--------|-----|--------|
+| 1 | 0 | 5 | 1 | 9 | 10 | sum > 9 → right-- |
+| 2 | 0 | 4 | 1 | 8 | 9 | **sum == 9 → return [0, 4]** |
 
-Use when: cycle detection, finding the middle of a list, Nth node from end.
+2 steps instead of checking all 15 pairs.
 
 ---
 
-## Example 1 — Two Sum (Sorted Array)
+## Java Implementation
 
-Find two numbers that add up to the target. Array is sorted.
+### Pattern 1 — Opposite Ends: Two Sum
 
 ```java
+// Time: O(n)  Space: O(1)
 int[] twoSum(int[] nums, int target) {
     int left = 0, right = nums.length - 1;
     while (left < right) {
         int sum = nums[left] + nums[right];
         if (sum == target) return new int[]{left, right};
-        if (sum < target) left++;
-        else              right--;
+        if (sum < target)  left++;
+        else               right--;
     }
     return new int[]{-1, -1};
 }
 ```
 
-```mermaid
-graph LR
-    subgraph "Find pair summing to 9 in [1,2,4,6,8,9]"
-    A["[1, 2, 4, 6, 8, 9]"] --> B["left=1, right=9, sum=10 > 9 → right--"]
-    B --> C["left=1, right=8, sum=9 == 9 → found!"]
-    end
-    style C fill:#82b366,color:#fff
-```
-
----
-
-## Example 2 — Check Palindrome
+### Pattern 1 — Opposite Ends: Palindrome Check
 
 ```java
+// Time: O(n)  Space: O(1)
 boolean isPalindrome(String s) {
-    int left = 0, right = s.length() - 1;
-    while (left < right) {
-        if (s.charAt(left) != s.charAt(right)) return false;
-        left++;
-        right--;
+    int l = 0, r = s.length() - 1;
+    while (l < r) {
+        if (s.charAt(l) != s.charAt(r)) return false;
+        l++; r--;
     }
     return true;
 }
 ```
 
----
-
-## Example 3 — Remove Duplicates from Sorted Array
+### Pattern 2 — Fast and Slow: Find Middle of Linked List
 
 ```java
-int removeDuplicates(int[] nums) {
-    if (nums.length == 0) return 0;
-    int slow = 0;
-    for (int fast = 1; fast < nums.length; fast++) {
-        if (nums[fast] != nums[slow]) {
-            slow++;
-            nums[slow] = nums[fast];
-        }
-    }
-    return slow + 1;
-}
-```
-
----
-
-## Example 4 — Find Middle of Linked List
-
-```java
+// Time: O(n)  Space: O(1)
 ListNode findMiddle(ListNode head) {
     ListNode slow = head, fast = head;
     while (fast != null && fast.next != null) {
         slow = slow.next;
         fast = fast.next.next;
     }
-    return slow; // slow is at the middle
+    return slow;
 }
 ```
 
----
-
-## Example 5 — Detect Cycle in Linked List
+### Pattern 2 — Fast and Slow: Detect Cycle
 
 ```java
+// Time: O(n)  Space: O(1)
 boolean hasCycle(ListNode head) {
     ListNode slow = head, fast = head;
     while (fast != null && fast.next != null) {
         slow = slow.next;
         fast = fast.next.next;
-        if (slow == fast) return true; // they meet → cycle
+        if (slow == fast) return true;
     }
     return false;
 }
 ```
 
+### Pattern 3 — Same Direction: Remove Duplicates
+
+```java
+// Time: O(n)  Space: O(1)
+int removeDuplicates(int[] nums) {
+    int slow = 0;
+    for (int fast = 1; fast < nums.length; fast++)
+        if (nums[fast] != nums[slow]) nums[++slow] = nums[fast];
+    return slow + 1;
+}
+```
+
 ---
 
-## When to Use
+## Common Mistakes
 
-| Signal in problem                         | Use two pointers?     |
-|-------------------------------------------|-----------------------|
-| Sorted array, find pair with target sum   | Yes — opposite ends   |
-| Palindrome check                          | Yes — opposite ends   |
-| Remove duplicates in-place                | Yes — fast/slow       |
-| Find middle of linked list                | Yes — fast/slow       |
-| Cycle detection                           | Yes — fast/slow       |
-| Container with most water                 | Yes — opposite ends   |
-| Merge two sorted arrays                   | Yes — one pointer per array |
+- **Using two pointers on an unsorted array for pair sums.** The opposite-ends pattern only works on a sorted array. Use a HashMap for unsorted arrays.
+- **Crossing pointers.** Stop the loop when `left < right`, not `left <= right`. When they meet, there is no valid pair left.
+- **Moving the wrong pointer.** For pair sums: if the sum is too big, move `right` left. If too small, move `left` right. Getting this backwards gives wrong results.
+- **Off-by-one on fast pointer.** For fast/slow, check both `fast != null` and `fast.next != null` before advancing. Checking only one causes NullPointerException.
+
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Easy | Valid Palindrome | [LeetCode 125](https://leetcode.com/problems/valid-palindrome/) |
+| Medium | 3Sum | [LeetCode 15](https://leetcode.com/problems/3sum/) |
+| Medium | Container With Most Water | [LeetCode 11](https://leetcode.com/problems/container-with-most-water/) |
+
+---
+
+## Deep Dive
+
+### When to Use Two Pointers vs HashMap
+
+| Situation | Two Pointers | HashMap |
+|-----------|-------------|---------|
+| Array is sorted | ✓ | Works but slower |
+| Array is unsorted | ✗ | ✓ |
+| Need O(1) space | ✓ | ✗ (O(n) space) |
+| Need the actual indices | ✓ | ✓ |
+
+Two pointers shines when the array is sorted. HashMap handles unsorted input but uses extra space.
