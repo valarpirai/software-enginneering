@@ -1,41 +1,71 @@
 # Trie (Prefix Tree)
 
-A trie stores strings character by character. Each path from root to a marked node forms a word. Ideal for prefix search and autocomplete.
+A tree that stores strings character by character. Each path from root to a marked node forms a complete word.
 
 ---
 
-## Structure
+## Intuition
 
-```mermaid
-graph TD
-    ROOT(["root"]) --> A["a"]
-    ROOT --> C["c"]
-    A --> AP["p"]
-    AP --> APP["p  ✓ (app)"]
-    APP --> APPL["l"]
-    APPL --> APPLE["e  ✓ (apple)"]
-    C --> CA["a"]
-    CA --> CAT["t  ✓ (cat)"]
-    CA --> CAR["r  ✓ (car)"]
-    style ROOT fill:#4a90d9,color:#fff
-    style APP fill:#82b366,color:#fff
-    style APPLE fill:#82b366,color:#fff
-    style CAT fill:#82b366,color:#fff
-    style CAR fill:#82b366,color:#fff
-```
-
-Words stored: `app`, `apple`, `cat`, `car`. The ✓ marks end of a complete word.
+A trie is a spell-checker's data structure. Each level holds one character. Words that share a prefix share the same path from the root. Finding all words that start with "ca" means walking to the "c" node, then "a", then collecting everything below.
 
 ---
 
 ## Operations
 
-| Operation      | Time | Notes                           |
-|----------------|------|---------------------------------|
-| insert(word)   | O(m) | m = length of word              |
-| search(word)   | O(m) | Exact match                     |
-| startsWith(prefix) | O(m) | Prefix match               |
-| delete(word)   | O(m) | Remove word, clean unused nodes |
+| Operation | Time | Notes |
+|-----------|------|-------|
+| insert(word) | O(m) | m = word length |
+| search(word) | O(m) | Exact match |
+| startsWith(prefix) | O(m) | Prefix match |
+| delete(word) | O(m) | Remove word, clean unused nodes |
+
+---
+
+## Sample Input
+
+```
+insert("cat"), insert("car"), insert("app"), insert("apple")
+search("car")
+startsWith("ca")
+```
+
+---
+
+## Visual Representation
+
+```mermaid
+graph TD
+    ROOT(["root"]) --> C["c"]
+    ROOT --> A["a"]
+    C --> CA["a"]
+    CA --> CAT["t ✓ (cat)"]
+    CA --> CAR["r ✓ (car)"]
+    A --> AP["p"]
+    AP --> APP["p ✓ (app)"]
+    APP --> APPL["l"]
+    APPL --> APPLE["e ✓ (apple)"]
+    style ROOT fill:#4a90d9,color:#fff
+    style CAT fill:#82b366,color:#fff
+    style CAR fill:#82b366,color:#fff
+    style APP fill:#82b366,color:#fff
+    style APPLE fill:#82b366,color:#fff
+```
+
+The ✓ marks end of a complete word.
+
+---
+
+## Step-by-step Trace — Search "car"
+
+Input: trie contains "cat", "car", "app", "apple". Search for "car".
+
+| Step | Char | Node found? | isEnd? | Action |
+|------|------|-------------|--------|--------|
+| 1 | 'c' | Yes | No | Move to 'c' node |
+| 2 | 'a' | Yes | No | Move to 'a' node |
+| 3 | 'r' | Yes | **Yes** | **return true** |
+
+Search "dog" would fail at step 1 — no 'd' child on root.
 
 ---
 
@@ -48,20 +78,21 @@ class TrieNode {
 }
 
 class Trie {
-    private TrieNode root = new TrieNode();
+    private final TrieNode root = new TrieNode();
 
+    // Time: O(m)
     void insert(String word) {
         TrieNode node = root;
         for (char c : word.toCharArray()) {
             int i = c - 'a';
-            if (node.children[i] == null) {
+            if (node.children[i] == null)
                 node.children[i] = new TrieNode();
-            }
             node = node.children[i];
         }
         node.isEnd = true;
     }
 
+    // Time: O(m)
     boolean search(String word) {
         TrieNode node = root;
         for (char c : word.toCharArray()) {
@@ -72,6 +103,7 @@ class Trie {
         return node.isEnd;
     }
 
+    // Time: O(m)
     boolean startsWith(String prefix) {
         TrieNode node = root;
         for (char c : prefix.toCharArray()) {
@@ -84,85 +116,68 @@ class Trie {
 }
 ```
 
----
-
-## Step-by-Step: Insert "cat"
-
-```mermaid
-graph LR
-    subgraph "Insert c → a → t"
-    R(["root"]) --> C["c"]
-    C --> A["a"]
-    A --> T["t  ✓"]
-    end
-    style T fill:#82b366,color:#fff
-    style R fill:#4a90d9,color:#fff
-```
-
----
-
-## Step-by-Step: Search "car" in {cat, car}
-
-```mermaid
-graph TD
-    R(["root"]) --> C["c  ← match"]
-    C --> CA["a  ← match"]
-    CA --> CAT["t  ✓"]
-    CA --> CAR["r  ✓  ← found! isEnd=true"]
-    style C fill:#ff9900,color:#000
-    style CA fill:#ff9900,color:#000
-    style CAR fill:#82b366,color:#fff
-    style R fill:#4a90d9,color:#fff
-```
-
----
-
-## Trie vs HashMap for String Lookup
-
-| Feature               | Trie           | HashMap              |
-|-----------------------|----------------|----------------------|
-| Exact search          | O(m)           | O(m) average         |
-| Prefix search         | O(m)           | Not supported natively|
-| Space                 | More (nodes)   | Less                 |
-| Autocomplete          | Natural fit    | Requires extra work  |
-
----
-
-## Common Use Cases
-
-| Use Case                  | How Trie Helps                          |
-|---------------------------|-----------------------------------------|
-| Autocomplete              | All words that start with a prefix      |
-| Spell checker             | Find closest matching word              |
-| IP routing                | Longest prefix match                    |
-| Word search in grid       | Build trie of words, DFS the grid       |
-| Dictionary lookup         | Faster than scanning all words          |
-
----
-
-## Autocomplete Example
+### Autocomplete
 
 ```java
-List<String> autocomplete(Trie trie, String prefix) {
+// Time: O(m + k) where k = number of matching words
+List<String> autocomplete(String prefix) {
     List<String> results = new ArrayList<>();
-    TrieNode node = trie.root;
+    TrieNode node = root;
     for (char c : prefix.toCharArray()) {
         int i = c - 'a';
         if (node.children[i] == null) return results;
         node = node.children[i];
     }
-    collectWords(node, new StringBuilder(prefix), results);
+    collect(node, new StringBuilder(prefix), results);
     return results;
 }
 
-void collectWords(TrieNode node, StringBuilder current, List<String> results) {
+void collect(TrieNode node, StringBuilder current, List<String> results) {
     if (node.isEnd) results.add(current.toString());
     for (int i = 0; i < 26; i++) {
         if (node.children[i] != null) {
-            current.append((char) ('a' + i));
-            collectWords(node.children[i], current, results);
+            current.append((char)('a' + i));
+            collect(node.children[i], current, results);
             current.deleteCharAt(current.length() - 1);
         }
     }
 }
 ```
+
+---
+
+## Common Mistakes
+
+- **`search` vs `startsWith`.** `search("app")` requires `isEnd = true`. `startsWith("app")` only requires the path to exist — `isEnd` doesn't matter.
+- **Array index for characters.** Use `c - 'a'` for lowercase letters. For uppercase or mixed, use a `HashMap<Character, TrieNode>` instead.
+- **Memory per node.** Each `TrieNode` allocates a 26-element array — even if only one child exists. A sparse trie with many unique characters wastes memory. Use `HashMap<Character, TrieNode>` for space efficiency.
+- **Forgetting to set `isEnd = true`.** Without this, `search("cat")` returns false even if "cat" was inserted.
+
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Medium | Implement Trie (Prefix Tree) | [LeetCode 208](https://leetcode.com/problems/implement-trie-prefix-tree/) |
+| Medium | Word Search II | [LeetCode 212](https://leetcode.com/problems/word-search-ii/) |
+| Medium | Replace Words | [LeetCode 648](https://leetcode.com/problems/replace-words/) |
+
+---
+
+## Deep Dive
+
+### Trie vs HashMap for String Lookup
+
+| Feature | Trie | HashMap |
+|---------|------|---------|
+| Exact search | O(m) | O(m) average |
+| Prefix search | O(m) | Not supported natively |
+| Space | More (node per char) | Less |
+| Autocomplete | Natural | Requires extra work |
+
+Use a trie when prefix queries matter. Use a HashMap when you only need exact lookups.
+
+### Space Optimization
+
+The 26-child array uses 26 × 8 = 208 bytes per node. For a dictionary with 100,000 words averaging 6 characters, that's 600,000 nodes × 208 bytes = ~125 MB. Switching to `HashMap<Character, TrieNode>` cuts memory to only the children that exist.
