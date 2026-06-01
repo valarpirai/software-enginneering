@@ -1,4 +1,5 @@
 - [Index](00-index.md)
+- [Complexity Analysis](00b-complexity-analysis.md)
 
 - **Data Structures**
 - [Arrays & Strings](00a-arrays-and-strings.md)
@@ -35,3 +36,6 @@
 - [Dynamic Programming](42-dynamic-programming.md)
 - [Greedy](43-greedy.md)
 - [Backtracking](44-backtracking.md)
+
+- **Practice**
+- [Popular 50 Problems](50-popular-problems.md)

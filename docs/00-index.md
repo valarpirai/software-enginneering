@@ -2,6 +2,9 @@
 
 A reference guide covering the most common DSA topics with time/space complexity and learning order.
 
+- [Complexity Analysis](00b-complexity-analysis.md) — Big O, time & space complexity rules
+- [Popular 50 Problems](50-popular-problems.md) — Curated interview problems with progress tracker
+
 ---
 
 ## How to Read Complexity Notation
