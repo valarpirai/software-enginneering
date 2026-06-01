@@ -3,8 +3,7 @@
 
 - **Data Structures**
 - [Arrays & Strings](00a-arrays-and-strings.md)
-- [Linked List — Data Type](01-linked-list-data-type.md)
-- [Linked List — Traversal](02-linked-list-traversal.md)
+- [Linked List](01-linked-list.md)
 - [Stack](03-stack.md)
 - [MinStack](03a-min-stack.md)
 - [Queue](04-queue.md)

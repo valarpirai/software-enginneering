@@ -36,8 +36,7 @@ A reference guide covering the most common DSA topics with time/space complexity
 
 Files:
 - [00a — Arrays & Strings](00a-arrays-and-strings.md)
-- [01 — Linked List Data Type](01-linked-list-data-type.md)
-- [02 — Linked List Traversal](02-linked-list-traversal.md)
+- [01 — Linked List](01-linked-list.md)
 - [03 — Stack](03-stack.md)
 - [03a — MinStack](03a-min-stack.md)
 - [04 — Queue](04-queue.md)
