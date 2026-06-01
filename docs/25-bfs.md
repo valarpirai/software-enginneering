@@ -1,23 +1,41 @@
 # BFS — Breadth First Search
 
-BFS explores a graph or tree level by level. It visits all neighbors of a node before moving to the next level. Uses a queue.
-
-| Time     | Space    |
-|----------|----------|
-| O(V + E) | O(V)     |
+Explore a graph or tree level by level. Visit all neighbors before going deeper.
 
 ---
 
-## How It Works
+## Intuition
 
-1. Enqueue the start node. Mark it visited.
-2. Dequeue a node. Process it.
-3. Enqueue all unvisited neighbors. Mark them visited.
-4. Repeat until the queue is empty.
+BFS is like ripples in water. Drop a stone at the start node. The wave spreads outward one layer at a time. Every node at distance 1 is visited before any node at distance 2. This guarantees the shortest path in an unweighted graph.
 
 ---
 
-## BFS on a Tree
+## Operations
+
+| Time | Space |
+|------|-------|
+| O(V + E) | O(V) |
+
+V = vertices, E = edges.
+
+---
+
+## Sample Input
+
+```
+Tree:
+        1
+       / \
+      2   3
+     / \ / \
+    4  5 6  7
+
+Start: node 1
+```
+
+---
+
+## Visual Representation
 
 ```mermaid
 graph TD
@@ -28,107 +46,93 @@ graph TD
     C --> F["6"]
     C --> G["7"]
     style A fill:#ff9900,color:#000
+    style B fill:#4a90d9,color:#fff
+    style C fill:#4a90d9,color:#fff
+    style D fill:#82b366,color:#fff
+    style E fill:#82b366,color:#fff
+    style F fill:#82b366,color:#fff
+    style G fill:#82b366,color:#fff
 ```
 
 Visit order: **1 → 2 → 3 → 4 → 5 → 6 → 7**
 
-```mermaid
-graph LR
-    subgraph "Level 0"
-    L0["1"]
-    end
-    subgraph "Level 1"
-    L1A["2"] --- L1B["3"]
-    end
-    subgraph "Level 2"
-    L2A["4"] --- L2B["5"] --- L2C["6"] --- L2D["7"]
-    end
-    L0 --> L1A
-    style L0 fill:#4a90d9,color:#fff
-    style L1A fill:#ff9900,color:#000
-    style L1B fill:#ff9900,color:#000
-    style L2A fill:#82b366,color:#fff
-    style L2B fill:#82b366,color:#fff
-    style L2C fill:#82b366,color:#fff
-    style L2D fill:#82b366,color:#fff
-```
+---
+
+## Step-by-step Trace
+
+Input: tree above, start at node 1
+
+| Step | Dequeue | Queue after | Visited |
+|------|---------|-------------|---------|
+| init | — | [1] | {} |
+| 1 | 1 | [2, 3] | {1} |
+| 2 | 2 | [3, 4, 5] | {1, 2} |
+| 3 | 3 | [4, 5, 6, 7] | {1, 2, 3} |
+| 4 | 4 | [5, 6, 7] | {1, 2, 3, 4} |
+| 5 | 5 | [6, 7] | {1, 2, 3, 4, 5} |
+| 6 | 6 | [7] | {1, 2, 3, 4, 5, 6} |
+| 7 | 7 | [] | {1, 2, 3, 4, 5, 6, 7} |
 
 ---
 
-## Java — BFS on Tree
+## Java Implementation
+
+### BFS on Tree
 
 ```java
+// Time: O(n)  Space: O(n)
 void bfsTree(TreeNode root) {
     if (root == null) return;
-    Queue<TreeNode> queue = new ArrayDeque<>();
-    queue.offer(root);
-    while (!queue.isEmpty()) {
-        TreeNode node = queue.poll();
+    Queue<TreeNode> q = new ArrayDeque<>();
+    q.offer(root);
+    while (!q.isEmpty()) {
+        TreeNode node = q.poll();
         System.out.print(node.val + " ");
-        if (node.left  != null) queue.offer(node.left);
-        if (node.right != null) queue.offer(node.right);
+        if (node.left  != null) q.offer(node.left);
+        if (node.right != null) q.offer(node.right);
     }
 }
+// Output: 1 2 3 4 5 6 7
 ```
 
----
-
-## BFS on Graph
-
-```mermaid
-graph LR
-    0 --- 1
-    0 --- 2
-    1 --- 3
-    2 --- 4
-    3 --- 5
-```
-
-Start at 0. Visit order: **0 → 1 → 2 → 3 → 4 → 5**
+### BFS on Graph
 
 ```java
+// Time: O(V + E)  Space: O(V)
 void bfsGraph(List<List<Integer>> adj, int start) {
     boolean[] visited = new boolean[adj.size()];
-    Queue<Integer> queue = new ArrayDeque<>();
-
-    queue.offer(start);
+    Queue<Integer> q = new ArrayDeque<>();
+    q.offer(start);
     visited[start] = true;
-
-    while (!queue.isEmpty()) {
-        int node = queue.poll();
+    while (!q.isEmpty()) {
+        int node = q.poll();
         System.out.print(node + " ");
-        for (int neighbor : adj.get(node)) {
+        for (int neighbor : adj.get(node))
             if (!visited[neighbor]) {
                 visited[neighbor] = true;
-                queue.offer(neighbor);
+                q.offer(neighbor);
             }
-        }
     }
 }
 ```
 
----
-
-## BFS Level by Level
-
-Useful when you need to know which level (depth) each node is at.
+### Level-by-Level (track depth)
 
 ```java
+// Time: O(n)  Space: O(n)
 List<List<Integer>> levelOrder(TreeNode root) {
     List<List<Integer>> result = new ArrayList<>();
     if (root == null) return result;
-
-    Queue<TreeNode> queue = new ArrayDeque<>();
-    queue.offer(root);
-
-    while (!queue.isEmpty()) {
-        int levelSize = queue.size();
+    Queue<TreeNode> q = new ArrayDeque<>();
+    q.offer(root);
+    while (!q.isEmpty()) {
+        int size = q.size();
         List<Integer> level = new ArrayList<>();
-        for (int i = 0; i < levelSize; i++) {
-            TreeNode node = queue.poll();
+        for (int i = 0; i < size; i++) {
+            TreeNode node = q.poll();
             level.add(node.val);
-            if (node.left  != null) queue.offer(node.left);
-            if (node.right != null) queue.offer(node.right);
+            if (node.left  != null) q.offer(node.left);
+            if (node.right != null) q.offer(node.right);
         }
         result.add(level);
     }
@@ -136,43 +140,61 @@ List<List<Integer>> levelOrder(TreeNode root) {
 }
 ```
 
----
-
-## Shortest Path (Unweighted Graph)
-
-BFS finds the shortest path in an unweighted graph. The first time BFS reaches a node, that path is the shortest.
+### Shortest Path (unweighted graph)
 
 ```java
+// Time: O(V + E)  Space: O(V)
 int shortestPath(List<List<Integer>> adj, int start, int end) {
     boolean[] visited = new boolean[adj.size()];
-    Queue<int[]> queue = new ArrayDeque<>(); // {node, distance}
-    queue.offer(new int[]{start, 0});
+    Queue<int[]> q = new ArrayDeque<>();
+    q.offer(new int[]{start, 0});
     visited[start] = true;
-
-    while (!queue.isEmpty()) {
-        int[] curr = queue.poll();
+    while (!q.isEmpty()) {
+        int[] curr = q.poll();
         int node = curr[0], dist = curr[1];
         if (node == end) return dist;
-        for (int neighbor : adj.get(node)) {
+        for (int neighbor : adj.get(node))
             if (!visited[neighbor]) {
                 visited[neighbor] = true;
-                queue.offer(new int[]{neighbor, dist + 1});
+                q.offer(new int[]{neighbor, dist + 1});
             }
-        }
     }
-    return -1; // not reachable
+    return -1;
 }
 ```
 
 ---
 
-## Common Use Cases
+## Common Mistakes
 
-| Use Case                       | Why BFS                                 |
-|--------------------------------|-----------------------------------------|
-| Shortest path (unweighted)     | First path found is always shortest     |
-| Level-order tree traversal     | Natural level-by-level processing       |
-| Connected components           | BFS from each unvisited node            |
-| Web crawler                    | Explore links level by level            |
-| Social network friend distance | BFS gives degree of separation          |
-| Cycle detection (undirected)   | Re-visiting a visited node means cycle  |
+- **Not marking nodes visited when enqueuing.** If you mark visited only when dequeuing, the same node gets enqueued multiple times. Mark visited immediately on enqueue.
+- **Using a stack instead of a queue.** A stack gives DFS, not BFS. BFS requires a queue.
+- **Forgetting to check for null root.** Always guard with `if (root == null) return` before enqueuing.
+- **Not tracking depth when needed.** Use the `int size = q.size()` trick at the start of each level to process nodes level by level.
+
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Medium | Binary Tree Level Order Traversal | [LeetCode 102](https://leetcode.com/problems/binary-tree-level-order-traversal/) |
+| Medium | Rotting Oranges | [LeetCode 994](https://leetcode.com/problems/rotting-oranges/) |
+| Hard | Word Ladder | [LeetCode 127](https://leetcode.com/problems/word-ladder/) |
+
+---
+
+## Deep Dive
+
+### Why BFS Finds the Shortest Path
+
+BFS visits nodes in order of their distance from the start. The first time it reaches a node, it has taken the fewest hops to get there. Any later path to that node would be longer. This guarantee only holds for unweighted graphs — for weighted graphs, use Dijkstra.
+
+### BFS vs DFS
+
+| Property | BFS | DFS |
+|----------|-----|-----|
+| Data structure | Queue | Stack (or recursion) |
+| Shortest path | Yes (unweighted) | No |
+| Memory | O(width) — wide trees hurt | O(depth) — deep trees hurt |
+| Use for | Level order, shortest path | Cycle detection, path finding, topological sort |

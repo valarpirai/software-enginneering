@@ -1,24 +1,43 @@
 # Dijkstra's Algorithm
 
-Dijkstra finds the shortest path from a source vertex to all other vertices in a weighted graph. All edge weights must be non-negative.
-
-| Time              | Space |
-|-------------------|-------|
-| O((V + E) log V)  | O(V)  |
+Find the shortest path from a source vertex to all other vertices in a weighted graph.
 
 ---
 
-## How It Works
+## Intuition
 
-1. Start with distance 0 for the source. All others are infinity.
-2. Use a min-heap (priority queue). Always process the vertex with the smallest known distance first.
-3. For each neighbor, check if going through the current vertex gives a shorter path.
-4. If yes, update the distance and add it to the heap.
-5. Repeat until all vertices are processed.
+Always process the nearest unvisited vertex first. When you reach a neighbor, check: is the path through the current vertex shorter than what you already know? If yes, update. Repeat until all vertices are processed.
 
 ---
 
-## Example Graph
+## Operations
+
+| Time | Space |
+|------|-------|
+| O((V + E) log V) | O(V) |
+
+All edge weights must be non-negative.
+
+---
+
+## Sample Input
+
+```
+Graph (A=0, B=1, C=2, D=3, E=4):
+A --4--> B
+A --2--> C
+C --1--> B
+B --5--> D
+B --3--> E
+C --8--> D
+D --2--> E
+
+Source: A
+```
+
+---
+
+## Visual Representation
 
 ```mermaid
 graph LR
@@ -26,36 +45,33 @@ graph LR
     A --"2"--> C
     C --"1"--> B
     B --"5"--> D
-    C --"8"--> D
     B --"3"--> E
+    C --"8"--> D
     D --"2"--> E
 ```
 
-Shortest paths from A: A→B=3, A→C=2, A→D=8, A→E=6
+Shortest paths from A: A→C=2, A→B=3 (via C), A→E=6, A→D=8
 
 ---
 
-## Step-by-Step from A
+## Step-by-step Trace
 
-```mermaid
-graph TD
-    S1["Init: dist = {A:0, B:∞, C:∞, D:∞, E:∞}"]
-    S1 --> S2["Process A → update B=4, C=2"]
-    S2 --> S3["Process C (dist=2) → update B=3 via C, D=10"]
-    S3 --> S4["Process B (dist=3) → update D=8, E=6"]
-    S4 --> S5["Process E (dist=6) → no improvement"]
-    S5 --> S6["Process D (dist=8) → done"]
-    style S1 fill:#4a90d9,color:#fff
-    style S6 fill:#82b366,color:#fff
-```
+Source: A (index 0). Initial dist = {A:0, B:∞, C:∞, D:∞, E:∞}
+
+| Step | Process | Via | Updates | dist array |
+|------|---------|-----|---------|------------|
+| 1 | A (dist=0) | — | B=4, C=2 | [0, 4, 2, ∞, ∞] |
+| 2 | C (dist=2) | A→C | B=min(4,3)=3, D=10 | [0, 3, 2, 10, ∞] |
+| 3 | B (dist=3) | A→C→B | D=min(10,8)=8, E=6 | [0, 3, 2, 8, 6] |
+| 4 | E (dist=6) | — | no improvement | [0, 3, 2, 8, 6] |
+| 5 | D (dist=8) | — | no improvement | **[0, 3, 2, 8, 6]** |
 
 ---
 
 ## Java Implementation
 
 ```java
-import java.util.*;
-
+// Time: O((V + E) log V)  Space: O(V)
 int[] dijkstra(List<List<int[]>> adj, int src, int V) {
     int[] dist = new int[V];
     Arrays.fill(dist, Integer.MAX_VALUE);
@@ -68,13 +84,12 @@ int[] dijkstra(List<List<int[]>> adj, int src, int V) {
     while (!pq.isEmpty()) {
         int[] curr = pq.poll();
         int d = curr[0], u = curr[1];
-
-        if (d > dist[u]) continue; // outdated entry
+        if (d > dist[u]) continue; // outdated entry — skip
 
         for (int[] edge : adj.get(u)) {
-            int v = edge[0], weight = edge[1];
-            if (dist[u] + weight < dist[v]) {
-                dist[v] = dist[u] + weight;
+            int v = edge[0], w = edge[1];
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
                 pq.offer(new int[]{dist[v], v});
             }
         }
@@ -83,7 +98,7 @@ int[] dijkstra(List<List<int[]>> adj, int src, int V) {
 }
 ```
 
-### Build the Graph
+### Build the Sample Graph
 
 ```java
 int V = 5; // A=0, B=1, C=2, D=3, E=4
@@ -99,15 +114,13 @@ adj.get(1).add(new int[]{4, 3}); // B → E, weight 3
 adj.get(3).add(new int[]{4, 2}); // D → E, weight 2
 
 int[] distances = dijkstra(adj, 0, V);
-// distances: [0, 3, 2, 8, 6]
+// Result: [0, 3, 2, 8, 6]
 ```
 
----
-
-## Reconstruct Shortest Path
+### Reconstruct the Shortest Path
 
 ```java
-int[] dijkstraWithPath(List<List<int[]>> adj, int src, int V) {
+int[] dijkstraWithPrev(List<List<int[]>> adj, int src, int V) {
     int[] dist = new int[V];
     int[] prev = new int[V];
     Arrays.fill(dist, Integer.MAX_VALUE);
@@ -116,7 +129,6 @@ int[] dijkstraWithPath(List<List<int[]>> adj, int src, int V) {
 
     PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
     pq.offer(new int[]{0, src});
-
     while (!pq.isEmpty()) {
         int[] curr = pq.poll();
         int d = curr[0], u = curr[1];
@@ -142,10 +154,35 @@ List<Integer> getPath(int[] prev, int target) {
 
 ---
 
-## Limitations
+## Common Mistakes
 
-| Limitation          | Alternative                        |
-|---------------------|------------------------------------|
-| Negative edge weights | Bellman-Ford                     |
-| Very dense graphs   | Fibonacci heap variant             |
-| All-pairs shortest path | Floyd-Warshall               |
+- **Using Dijkstra with negative edge weights.** It gives wrong results. Use Bellman-Ford for negative weights.
+- **Not skipping outdated heap entries.** When a shorter path is found, the old entry stays in the heap. The `if (d > dist[u]) continue` check discards it.
+- **Initializing dist to 0 instead of MAX_VALUE.** Every unvisited vertex must start at infinity so any path is shorter.
+- **Integer overflow when adding weights.** `dist[u] + w` can overflow if `dist[u]` is `Integer.MAX_VALUE`. The `d > dist[u]` skip prevents this for most cases, but be careful.
+
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Medium | Network Delay Time | [LeetCode 743](https://leetcode.com/problems/network-delay-time/) |
+| Medium | Path With Minimum Effort | [LeetCode 1631](https://leetcode.com/problems/path-with-minimum-effort/) |
+| Hard | Shortest Path in a Grid with Obstacles Elimination | [LeetCode 1293](https://leetcode.com/problems/shortest-path-in-a-grid-with-obstacles-elimination/) |
+
+---
+
+## Deep Dive
+
+### Why a Min-Heap?
+
+Dijkstra always processes the vertex with the smallest known distance next. A min-heap lets you extract the minimum in O(log V). A simple array would take O(V) to find the minimum — making the total O(V²), which is worse for sparse graphs.
+
+### Limitations
+
+| Limitation | Alternative |
+|------------|-------------|
+| Negative edge weights | Bellman-Ford |
+| All-pairs shortest path | Floyd-Warshall |
+| Very dense graphs | Fibonacci heap (O((V + E) + V log V)) |
