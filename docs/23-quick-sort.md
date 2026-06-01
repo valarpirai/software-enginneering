@@ -1,57 +1,70 @@
 # Quick Sort
 
-Quick sort picks a pivot element and partitions the array so that all elements smaller than the pivot go left and all larger go right. Then it sorts each side recursively.
-
-| Best       | Average    | Worst | Space    | Stable |
-|------------|------------|-------|----------|--------|
-| O(n log n) | O(n log n) | O(n²) | O(log n) | No     |
-
-Worst case happens when the pivot is always the smallest or largest element (sorted input with bad pivot choice).
+Pick a pivot. Partition the array so everything smaller is left of the pivot and everything larger is right. Sort each side recursively.
 
 ---
 
-## How It Works
+## Intuition
 
-### Step-by-Step: Sort [3, 6, 8, 10, 1, 2, 1] — pivot = last element
+Find one element's correct final position (the pivot). Every element smaller goes left. Every element larger goes right. Now the pivot is in its final spot. Recursively sort the two sides. No merging needed.
+
+---
+
+## Operations
+
+| Best | Average | Worst | Space | Stable |
+|------|---------|-------|-------|--------|
+| O(n log n) | O(n log n) | O(n²) | O(log n) | No |
+
+Worst case happens when the pivot is always the smallest or largest element (sorted input, bad pivot).
+
+---
+
+## Sample Input
+
+```
+arr = [3, 6, 8, 10, 1, 2]  pivot = last element (2)
+```
+
+---
+
+## Visual Representation
 
 ```mermaid
 graph TD
-    A["[3, 6, 8, 10, 1, 2, 1]  pivot = 1"] --> B["Partition"]
-    B --> LEFT["[1]  < pivot"]
-    B --> PIV["[1]  = pivot"]
-    B --> RIGHT["[3, 6, 8, 10, 2]  > pivot"]
-    LEFT --> LS["sorted"]
-    RIGHT --> RS["recurse"]
-    style PIV fill:#ff9900,color:#000
+    A["[3,6,8,10,1,2]  pivot=2"] --> B["Partition"]
+    B --> L["[1,2]  ≤ pivot"]
+    B --> P["2  (pivot in place)"]
+    B --> R["[3,6,8,10]  > pivot"]
+    L --> LS["recurse"]
+    R --> RS["recurse"]
+    style P fill:#ff9900,color:#000
     style LS fill:#82b366,color:#fff
 ```
 
 ---
 
-## Partition (Lomuto Scheme)
+## Step-by-step Trace — Partition [3, 6, 8, 10, 1, 2]
 
-The pivot goes to its correct final position. Elements left of it are smaller. Elements right are larger.
+Pivot = 2 (last element). `i` tracks the boundary of elements ≤ pivot.
 
-```mermaid
-graph LR
-    subgraph "Partition [3, 6, 8, 10, 1, 2, 1]  pivot=1"
-    A["i = -1, j scans left to right"]
-    A --> B["j=0: arr[0]=3 > 1, skip"]
-    B --> C["j=1: 6 > 1, skip"]
-    C --> D["j=2: 8 > 1, skip"]
-    D --> E["j=3: 10 > 1, skip"]
-    E --> F["j=4: 1 ≤ 1, i++, swap → [1, 6, 8, 10, 3, 2, 1]"]
-    F --> G["j=5: 2 > 1, skip"]
-    G --> H["Swap pivot to i+1 → [1, 1, 8, 10, 3, 2, 6]"]
-    end
-    style H fill:#82b366,color:#fff
-```
+| j | arr[j] | arr[j] ≤ 2? | i | Action | Array |
+|---|--------|-------------|---|--------|-------|
+| 0 | 3 | No | -1 | skip | [3,6,8,10,1,2] |
+| 1 | 6 | No | -1 | skip | [3,6,8,10,1,2] |
+| 2 | 8 | No | -1 | skip | [3,6,8,10,1,2] |
+| 3 | 10 | No | -1 | skip | [3,6,8,10,1,2] |
+| 4 | 1 | Yes | 0 | i++, swap j,i | [**1**,6,8,10,**3**,2] |
+| end | — | — | — | swap pivot to i+1 | [1,**2**,8,10,3,6] |
+
+Pivot 2 is now at index 1 — its final position.
 
 ---
 
 ## Java Implementation
 
 ```java
+// Time: O(n log n) average  Space: O(log n)
 void quickSort(int[] arr, int low, int high) {
     if (low < high) {
         int pi = partition(arr, low, high);
@@ -66,33 +79,23 @@ int partition(int[] arr, int low, int high) {
     for (int j = low; j < high; j++) {
         if (arr[j] <= pivot) {
             i++;
-            int temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;
+            int tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
         }
     }
-    int temp = arr[i + 1]; arr[i + 1] = arr[high]; arr[high] = temp;
+    int tmp = arr[i+1]; arr[i+1] = arr[high]; arr[high] = tmp;
     return i + 1;
 }
 
 // Call: quickSort(arr, 0, arr.length - 1);
 ```
 
----
-
-## Pivot Strategies
-
-| Strategy         | Worst Case Input           | Notes                          |
-|------------------|----------------------------|--------------------------------|
-| Last element     | Already sorted array       | Simple, but risky              |
-| First element    | Already sorted array       | Same risk                      |
-| Random element   | Very rare                  | Good in practice               |
-| Median of three  | Hard to construct          | Best practical choice          |
+### Random Pivot (avoids worst case)
 
 ```java
-// Random pivot — swap random element with last, then partition normally
 void quickSortRandom(int[] arr, int low, int high) {
     if (low < high) {
         int r = low + (int)(Math.random() * (high - low + 1));
-        int temp = arr[r]; arr[r] = arr[high]; arr[high] = temp;
+        int tmp = arr[r]; arr[r] = arr[high]; arr[high] = tmp;
         int pi = partition(arr, low, high);
         quickSortRandom(arr, low, pi - 1);
         quickSortRandom(arr, pi + 1, high);
@@ -100,27 +103,51 @@ void quickSortRandom(int[] arr, int low, int high) {
 }
 ```
 
----
+### Pivot Strategies
 
-## Quick Sort vs Merge Sort
-
-| Property          | Quick Sort    | Merge Sort    |
-|-------------------|---------------|---------------|
-| Average case      | O(n log n)    | O(n log n)    |
-| Worst case        | O(n²)         | O(n log n)    |
-| Space             | O(log n)      | O(n)          |
-| Cache performance | Better        | Worse         |
-| Stable            | No            | Yes           |
-| In-place          | Yes           | No            |
-
-Quick sort is faster in practice due to better cache locality. Java uses a dual-pivot quick sort for primitive arrays.
+| Strategy | Worst-case input | Notes |
+|----------|-----------------|-------|
+| Last element | Sorted array | Simple but risky |
+| First element | Sorted array | Same risk |
+| Random element | Very rare | Good in practice |
+| Median of three | Hard to construct | Best practical choice |
 
 ---
 
-## When to Use
+## Common Mistakes
 
-- Sorting primitive arrays (Java's default for `int[]`, `long[]`, etc.)
-- When in-place sorting matters (no extra memory)
-- Average performance matters more than worst-case guarantee
+- **Always picking first or last element as pivot on sorted input.** This gives O(n²). Use random pivot or median-of-three.
+- **Forgetting the base case `if (low < high)`.** Without it, recursion never stops.
+- **Inclusive vs exclusive bounds.** The recursive calls are `quickSort(arr, low, pi-1)` and `quickSort(arr, pi+1, high)`. The pivot at `pi` is already in its final position — exclude it from both sides.
+- **Confusing Quick Sort with Quick Select.** Quick Select finds the kth smallest element in O(n) average — it only recurses on one side.
 
-Avoid quick sort on nearly sorted data unless you use random pivot.
+---
+
+## Practice Problems
+
+| Difficulty | Problem | Link |
+|------------|---------|------|
+| Medium | Sort an Array | [LeetCode 912](https://leetcode.com/problems/sort-an-array/) |
+| Medium | Kth Largest Element in an Array | [LeetCode 215](https://leetcode.com/problems/kth-largest-element-in-an-array/) |
+| Medium | Sort Colors | [LeetCode 75](https://leetcode.com/problems/sort-colors/) |
+
+---
+
+## Deep Dive
+
+### Quick Sort vs Merge Sort
+
+| Property | Quick Sort | Merge Sort |
+|----------|-----------|-----------|
+| Average case | O(n log n) | O(n log n) |
+| Worst case | O(n²) | O(n log n) |
+| Space | O(log n) | O(n) |
+| Cache performance | Better | Worse |
+| Stable | No | Yes |
+| In-place | Yes | No |
+
+Quick Sort is faster in practice due to better cache locality — it accesses elements sequentially during partition. Merge Sort creates and copies to separate arrays, causing more cache misses.
+
+### Java's Dual-Pivot Quick Sort
+
+Java uses dual-pivot quick sort for `Arrays.sort(int[])`. It picks two pivots and partitions into three parts: less than pivot1, between pivots, greater than pivot2. This reduces the average number of comparisons and performs better than single-pivot in practice.
