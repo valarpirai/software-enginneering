@@ -1,6 +1,9 @@
 - [Index](00-index.md)
 - [Complexity Analysis](00c-complexity-analysis.md)
 
+- **Fundamentals**
+- [Recursion](00d-recursion.md)
+
 - **Data Structures**
 - [Arrays](00a-arrays.md)
 - [Strings](00b-strings.md)

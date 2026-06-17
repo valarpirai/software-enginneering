@@ -1,6 +1,7 @@
 # Data Structures & Algorithms
 
 - [Complexity Analysis](00c-complexity-analysis.md)
+- [Recursion](00d-recursion.md)
 - [Popular Problems](popular-problems.md)
 
 ---
